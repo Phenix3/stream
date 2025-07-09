@@ -98,6 +98,14 @@ class Video extends Model
     }
 
     /**
+     * Alias pour l'historique de visionnage (pluriel pour cohérence)
+     */
+    public function watchHistories(): HasMany
+    {
+        return $this->watchHistory();
+    }
+
+    /**
      * Relation avec les téléchargements
      */
     public function downloads(): HasMany

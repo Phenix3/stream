@@ -31,6 +31,7 @@ class User extends Authenticatable
         'phone_verified_at',
         'videos_watched',
         'total_watch_time',
+        'is_admin',
     ];
 
     /**
@@ -56,6 +57,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'videos_watched' => 'integer',
             'total_watch_time' => 'integer',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -166,5 +168,29 @@ class User extends Authenticatable
     public function hasVerifiedPhone(): bool
     {
         return !is_null($this->phone_verified_at);
+    }
+
+    /**
+     * Scope pour les administrateurs
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->where('is_admin', true);
+    }
+
+    /**
+     * Vérifier si l'utilisateur est administrateur
+     */
+    public function isAdmin(): bool
+    {
+        return $this->is_admin;
+    }
+
+    /**
+     * Relation avec l'historique de visionnage (alias)
+     */
+    public function watchHistories(): HasMany
+    {
+        return $this->hasMany(WatchHistory::class);
     }
 }

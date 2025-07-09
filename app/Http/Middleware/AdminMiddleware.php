@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Http\Resources\ApiResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
@@ -16,37 +15,23 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-
         // Vérifier si l'utilisateur est connecté
-        if (!$user) {
-            return ApiResponse::unauthorized('Authentification requise');
+        if (!auth()->check()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Non autorisé'], 401);
+            }
+            return redirect()->route('login');
         }
 
-        // Vérifier si l'utilisateur a les droits d'administration
-        // Pour cet exemple, on peut vérifier un champ 'is_admin' ou 'role'
-        // Vous devrez adapter cette logique selon votre système de rôles
-        
-        // Option 1: Vérifier par email (pour la démonstration)
-        $adminEmails = [
-            'admin@seledjam.com',
-            'superadmin@seledjam.com',
-        ];
-
-        if (in_array($user->email, $adminEmails)) {
-            return $next($request);
+        // Vérifier si l'utilisateur est un administrateur
+        $user = auth()->user();
+        if (!$user->is_admin) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Accès refusé. Privilèges administrateur requis.'], 403);
+            }
+            abort(403, 'Accès refusé. Privilèges administrateur requis.');
         }
 
-        // Option 2: Si vous avez un champ is_admin dans la table users
-        // if ($user->is_admin) {
-        //     return $next($request);
-        // }
-
-        // Option 3: Si vous avez un système de rôles plus complexe
-        // if ($user->hasRole('admin') || $user->hasRole('super-admin')) {
-        //     return $next($request);
-        // }
-
-        return ApiResponse::forbidden('Accès administrateur requis');
+        return $next($request);
     }
 } 
