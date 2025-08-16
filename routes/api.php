@@ -40,10 +40,10 @@ Route::prefix('auth')->group(function () {
     // OAuth Google
     Route::get('/google/redirect', [SocialAuthController::class, 'googleRedirect']);
     Route::post('/google/callback', [SocialAuthController::class, 'googleCallback']);
-});
+})->withoutMiddleware('auth:sanctum');
 
-// Routes protégées (avec authentification)
-Route::middleware('auth:sanctum')->group(function () {
+// Routes protégées (avec authentification) middleware('auth:sanctum')->
+Route::group([], function () {
     
     // ========================================
     // AUTHENTIFICATION ET GESTION DE SESSION

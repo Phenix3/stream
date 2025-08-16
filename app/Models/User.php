@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Sanctum\HasApiTokens;
 
+use ApiPlatform\Metadata\ApiResource;
+
+#[ApiResource()]
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

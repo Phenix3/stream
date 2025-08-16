@@ -16,7 +16,7 @@ class SessionResource extends JsonResource
     {
         return [
             'token' => $this->token,
-            'refreshToken' => $this->when(isset($this->refresh_token), $this->refresh_token),
+            // 'refreshToken' => $this->when(isset($this->refresh_token), $this->refresh_token),
             'expiresAt' => $this->expires_at?->toISOString(),
             'createdAt' => $this->created_at?->toISOString(),
         ];

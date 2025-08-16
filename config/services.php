@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'whatsapp-otp' => [
+        'base_url' => env('WHATSAPP_OTP_BASE_URL'),
+        'timeout' => env('WHATSAPP_OTP_TIMEOUT', 30),
+    ],
 
 ];

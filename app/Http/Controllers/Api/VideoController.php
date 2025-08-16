@@ -10,6 +10,7 @@ use App\Models\Video;
 use App\Models\Genre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class VideoController extends Controller
 {
@@ -18,63 +19,68 @@ class VideoController extends Controller
      */
     public function home(Request $request)
     {
-        $limit = $request->get('limit', 10);
-        $page = $request->get('page', 1);
+        try {
+            $limit = $request->get('limit', 10);
+            $page = $request->get('page', 1);
 
-        // Vidéos en vedette (les plus vues des 30 derniers jours)
-        $featuredVideos = Video::public()
-            ->with(['creator', 'genres', 'actors'])
-            ->where('created_at', '>=', now()->subDays(30))
-            ->orderBy('views', 'desc')
-            ->limit(5)
-            ->get();
+            // Vidéos en vedette (les plus vues des 30 derniers jours)
+            $featuredVideos = Video::public()
+                ->with(['creator:id,name,avatar,subscriber_count'])
+                ->where('created_at', '>=', now()->subDays(30))
+                ->orderBy('views', 'desc')
+                ->limit(5)
+                ->get();
 
-        // Sections de vidéos
-        $sections = [];
+            // Sections de vidéos
+            $sections = [];
 
-        // Section Latest
-        $latestVideos = Video::public()
-            ->with(['creator', 'genres'])
-            ->latest()
-            ->limit($limit)
-            ->get();
+            // Section Latest
+            $latestVideos = Video::public()
+                ->with(['creator:id,name,avatar,subscriber_count'])
+                ->latest()
+                ->limit($limit)
+                ->get();
 
-        $sections[] = (object) [
-            'title' => 'Latest',
-            'type' => 'latest',
-            'videos' => $latestVideos
-        ];
+            $sections[] = (object) [
+                'title' => 'Latest',
+                'type' => 'latest',
+                'videos' => $latestVideos
+            ];
 
-        // Section Trending
-        $trendingVideos = Video::public()
-            ->with(['creator', 'genres'])
-            ->trending()
-            ->limit($limit)
-            ->get();
+            // Section Trending
+            $trendingVideos = Video::public()
+                ->with(['creator:id,name,avatar,subscriber_count'])
+                ->trending()
+                ->limit($limit)
+                ->get();
 
-        $sections[] = (object) [
-            'title' => 'Trending',
-            'type' => 'trending', 
-            'videos' => $trendingVideos
-        ];
+            $sections[] = (object) [
+                'title' => 'Trending',
+                'type' => 'trending', 
+                'videos' => $trendingVideos
+            ];
 
-        // Section Popular
-        $popularVideos = Video::public()
-            ->with(['creator', 'genres'])
-            ->popular()
-            ->limit($limit)
-            ->get();
+            // Section Popular
+            $popularVideos = Video::public()
+                ->with(['creator:id,name,avatar,subscriber_count'])
+                ->popular()
+                ->limit($limit)
+                ->get();
 
-        $sections[] = (object) [
-            'title' => 'Popular',
-            'type' => 'popular',
-            'videos' => $popularVideos
-        ];
+            $sections[] = (object) [
+                'title' => 'Popular',
+                'type' => 'popular',
+                'videos' => $popularVideos
+            ];
 
-        return ApiResponse::success([
-            'featuredVideos' => VideoResource::collection($featuredVideos),
-            'sections' => VideoSectionResource::collection(collect($sections)),
-        ]);
+            return ApiResponse::success([
+                'featuredVideos' => VideoResource::collection($featuredVideos),
+                'sections' => VideoSectionResource::collection(collect($sections)),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in VideoController@home: ' . $e->getMessage());
+            return ApiResponse::error('Erreur lors du chargement des vidéos', 500);
+        }
     }
 
     /**
